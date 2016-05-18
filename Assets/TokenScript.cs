@@ -19,6 +19,8 @@ public class TokenScript : MonoBehaviour {
 	private float spinnerYRot;
 	private float yArrayDiff;
 
+	// Public direction string
+	public string direction;
 
 	// Use this for initialization
 	void Start () {
@@ -28,33 +30,26 @@ public class TokenScript : MonoBehaviour {
 		yArray [0] = 0.0f;
 		yArray [1] = 0.0f;
 
-		// set token names
-		for (int i = 0; i < tokens.Length; i++) {
-
-			string thisName = "Token" + i.ToString();
-			tokens [i].name = thisName;
-
-		}
-
-
 		for (int i = 0; i < slots.Length; i++) {
 
 			// Find the slot, and insert the appropriate token
-			string thisSlot = "Slot" + i.ToString ();
-			GameObject thisSlotGameObject = GameObject.Find (thisSlot);
-			Vector3 thisPosition = thisSlotGameObject.transform.position + new Vector3 (0, verticalOffset, 0);
+			//string thisSlot = "Slot" + i.ToString ();
+			//GameObject thisSlotGameObject = GameObject.Find (thisSlot);
 
 			// Instantiate the token
 			string thisTokenName = "Token" + i.ToString ();
-			Instantiate(tokens[i], thisPosition, new Quaternion()).name = thisTokenName;
+			InstantiateTokenInSlot (tokens[i], slots[i], thisTokenName);
 
-			// Find the token by name
-			GameObject thisToken = GameObject.Find (thisTokenName);
-			thisToken.transform.SetParent (thisSlotGameObject.transform);
-
-
+			TurnOnEndpointColliders (tokens);
 
 		}
+			
+
+		// Print the GameObjects
+		//print(tokens[0]);
+//		print(tokens[1]);
+//		print(tokens[2]);
+//		print(tokens[3]);
 	
 	}
 	
@@ -62,15 +57,15 @@ public class TokenScript : MonoBehaviour {
 	void FixedUpdate () {
 
 		checkDirection ();
-		updateTokens ();
+		//updateTokens ();
+		checkCollision();
+
 
 
 	}
 
 	string checkDirection() {
-
-		string direction;
-
+		
 		// Look for Y rotation.
 		spinnerYRot = transform.localEulerAngles.y;
 		//text.text = spinnerYRot.ToString();
@@ -82,9 +77,9 @@ public class TokenScript : MonoBehaviour {
 		// This is a 'hack-y' way of getting the direction of movement.
 		// Look up dot product, cross product for 'real' ways of calculating this
 		if (yArray [1] > yArray [0]) {
-			direction = "CLOCKWISE";
+			direction = "CW";
 		} else {
-			direction = "COUNTERCLOCKWISE";
+			direction = "CCW";
 		}
 
 		text.text = direction;
@@ -92,14 +87,42 @@ public class TokenScript : MonoBehaviour {
 
 	}
 
-	void updateTokens(){
+	string checkCollision() {
 
-		// We have this TOTAL array of tokens
-		// We also need the "CURRENT" array of tokens
-		// which should shift depending on the current state of the slider
 
-		// This re-evaluation should happen every time a SLOT hits the TOGGLE
+		return "";
+	}
 
+	public void InstantiateTokenInSlot(GameObject token, GameObject slot, string name){
+
+		Vector3 thisPosition = slot.transform.position + new Vector3 (0, verticalOffset, 0);
+		Instantiate(token, thisPosition, new Quaternion()).name = name; 
+			
+		// Find the token by name
+		GameObject thisToken = GameObject.Find (name);
+		thisToken.transform.SetParent (slot.transform);
+
+	}
+
+	// Turns on colliders for first and last tokens so they don't go through the trigger.
+	public void TurnOnEndpointColliders (GameObject[] tokenGameObjects){
+
+
+		// OPTION A: Use triggers on tokens
+		print ("EndpointColliders function called");
+
+		Collider firstCollider = tokenGameObjects [0].GetComponent<Collider> ();
+		Collider lastCollider = tokenGameObjects [tokenGameObjects.Length - 1].GetComponent<Collider> ();
+
+		firstCollider.enabled = true;
+		lastCollider.enabled = true;
+
+//		// OPTION B: Use triggers on parents (slots)
+//		Collider firstTokenSlotCollider = GameObject.Find(tokenGameObjects[0].name).GetComponentInParent<Collider>();
+//		Collider lastTokenSlotCollider = GameObject.Find(tokenGameObjects[tokenGameObjects.GetUpperBound(0)].name).GetComponentInParent<Collider>();
+//
+//		firstTokenSlotCollider.isTrigger = false;
+//		lastTokenSlotCollider.isTrigger = false;
 
 	}
 
